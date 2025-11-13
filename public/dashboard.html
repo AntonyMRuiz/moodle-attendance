@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#ECEAFF]">
+<head>
+  <meta charset="UTF-8">
+  <title>RIWI Asistencia - Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="h-full flex flex-col">
+
+  <!-- Topbar -->
+  <header class="w-full bg-white shadow-sm border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Logo" class="w-10 h-10 rounded-full bg-[#ECEAFF] object-contain">
+        <div>
+          <h1 class="text-lg font-bold text-[#4E3BBF]">Panel de Asistencia RIWI</h1>
+          <p class="text-xs text-slate-500">Resumen por cohorte, clanes y coders</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button
+          id="syncBtn"
+          class="text-xs font-semibold text-white bg-[#6F48FF] px-3 py-1.5 rounded-lg hover:bg-[#4E3BBF] transition"
+        >
+          🔄 Actualizar desde Moodle
+        </button>
+        <button
+          id="logoutBtn"
+          class="text-xs font-semibold text-white bg-[#EF4444] px-3 py-1.5 rounded-lg hover:bg-red-600 transition"
+        >
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+      <!-- Filtros -->
+      <section class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Sede</label>
+            <select
+              id="campusSelect"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+            >
+              <option value="">Selecciona una sede</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Cohorte</label>
+            <select
+              id="cohortSelect"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+            >
+              <option value="">Selecciona una cohorte</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Clan</label>
+            <select
+              id="clanSelect"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+            >
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Modo de vista</label>
+            <select
+              id="viewMode"
+              class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+            >
+              <option value="week">Semanal</option>
+              <option value="month">Mensual</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-end gap-4 justify-between">
+          <div class="flex gap-4 flex-wrap">
+            <div id="weekWrapper">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha de inicio (semana)</label>
+              <input
+                type="date"
+                id="weekStart"
+                class="w-full md:w-48 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+              />
+            </div>
+            <div id="monthWrapper" class="hidden">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Mes</label>
+              <input
+                type="month"
+                id="monthInput"
+                class="w-full md:w-48 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6F48FF]"
+              />
+            </div>
+          </div>
+
+          <div class="flex gap-3 items-end">
+            <button
+              id="loadSummaryBtn"
+              class="inline-flex items-center px-4 py-2 bg-[#6F48FF] text-white text-xs font-semibold rounded-lg hover:bg-[#4E3BBF] transition"
+            >
+              📊 Cargar resumen
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Resumen temporal (semana / mes) -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-4">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-semibold text-slate-700">Resumen diario</h2>
+            <span id="rangeLabel" class="text-xs text-slate-400">Rango: --</span>
+          </div>
+          <div class="h-64">
+            <canvas id="dailyChart"></canvas>
+          </div>
+          <p id="noSummaryMsg" class="text-[11px] text-slate-400 mt-3 hidden">
+            No hay registros para el rango seleccionado.
+          </p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md border border-slate-200 p-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Resumen por clan (rango)</h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-[11px]">
+              <thead class="bg-[#ECEAFF]">
+                <tr>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Clan</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Sesiones</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Presentes</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Retrasos</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">FJ</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">FI</th>
+                </tr>
+              </thead>
+              <tbody id="clanSummaryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sesiones del rango -->
+      <section class="bg-white rounded-2xl shadow-md border border-slate-200 p-4">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-sm font-semibold text-slate-700">
+            Sesiones del rango (clic para ver en Moodle)
+          </h2>
+          <span id="sessionsCountLabel" class="text-xs text-slate-400">0 sesiones</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-[11px]">
+            <thead class="bg-[#ECEAFF]">
+              <tr>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">Fecha</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">Clan</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">Descripción</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">P</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">R</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">FJ</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">FI</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">Total</th>
+                <th class="px-3 py-2 text-left font-semibold text-slate-600">Moodle</th>
+              </tr>
+            </thead>
+            <tbody id="sessionsTableBody"></tbody>
+          </table>
+        </div>
+
+        <p id="noSessionsMsg" class="text-[11px] text-slate-400 mt-3 hidden">
+          No hay sesiones registradas para el rango seleccionado.
+        </p>
+      </section>
+
+      <!-- Stats por coder (como antes) -->
+      <section class="bg-white rounded-2xl shadow-md border border-slate-200 p-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-700">Estadísticas de coders por cohorte</h2>
+            <p class="text-[11px] text-slate-400">
+              Clasificación: Bien (90–100%), Alerta (80–89%), Grave (&lt;80%).
+            </p>
+          </div>
+          <span id="studentsCountLabel" class="text-xs text-slate-400">0 estudiantes</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-[#F9FAFB] rounded-2xl p-3">
+            <p class="text-[11px] text-slate-500 mb-1">Estudiantes en la cohorte</p>
+            <p id="cardTotalStudents" class="text-xl font-bold text-slate-800">--</p>
+          </div>
+          <div class="bg-[#F9FAFB] rounded-2xl p-3">
+            <p class="text-[11px] text-slate-500 mb-1">% Asistencia promedio</p>
+            <p id="cardAvgAttendance" class="text-xl font-bold text-slate-800">-- %</p>
+          </div>
+          <div class="bg-[#F9FAFB] rounded-2xl p-3">
+            <p class="text-[11px] text-slate-500 mb-1">En Bien</p>
+            <p id="cardGoodCount" class="text-xl font-bold text-[#10B981]">--</p>
+          </div>
+          <div class="bg-[#F9FAFB] rounded-2xl p-3">
+            <p class="text-[11px] text-slate-500 mb-1">Alerta / Grave</p>
+            <p id="cardOthersCount" class="text-xl font-bold text-[#F59E0B]">--</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="h-64">
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-[11px]">
+              <thead class="bg-[#ECEAFF]">
+                <tr>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">#</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Nombre</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">% Asistencia</th>
+                  <th class="px-3 py-2 text-left font-semibold text-slate-600">Estado</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <p id="noCoderDataMsg" class="text-[11px] text-slate-400 mt-1 hidden">
+          No hay datos de estadística para la cohorte seleccionada.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module" src="/scripts/dashboard.js"></script>
+</body>
+</html>

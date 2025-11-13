@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-[#ECEAFF]">
+<head>
+    <meta charset="UTF-8">
+    <title>RIWI Asistencia</title>
+    <link rel="shortcut icon" href="https://riwi.io/wp-content/uploads/2023/07/favicon-300x300.png" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="h-full flex items-center justify-center">
+
+    <div class="bg-white shadow-xl rounded-xl p-10 w-full max-w-sm">
+        <!-- LOGO -->
+        <div class="flex justify-center mb-6">
+            <img src="https://riwi.io/wp-content/uploads/2025/08/cropped-RIWI-logo-dark-full-color.png" alt="Logo">
+        </div>
+
+        <h1 class="text-center text-2xl font-bold text-[#4E3BBF] mb-6">
+            Panel de Asistencia
+        </h1>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="text-sm font-medium">Correo</label>
+                <input type="email" id="email" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#6F48FF]" required>
+            </div>
+
+            <div>
+                <label class="text-sm font-medium">Contraseña</label>
+                <input type="password" id="password" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-[#6F48FF]" required>
+            </div>
+
+            <button
+                type="submit"
+                class="w-full py-3 bg-[#6F48FF] text-white rounded-lg font-semibold hover:bg-[#4E3BBF] transition"
+            >
+                Ingresar
+            </button>
+        </form>
+
+        <p id="errorMsg" class="text-red-500 text-center mt-4 hidden">
+            Credenciales incorrectas.
+        </p>
+    </div>
+
+    <script type="module" src="/scripts/login.js"></script>
+</body>
+</html>

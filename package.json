@@ -1,0 +1,35 @@
+{
+  "name": "moodle-attendance",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seeds/initialSeed.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AntonyMRuiz/moodle-attendance.git"
+  },
+  "author": "Antony Martinez Ruiz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AntonyMRuiz/moodle-attendance/issues"
+  },
+  "homepage": "https://github.com/AntonyMRuiz/moodle-attendance#readme",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.15.3",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
